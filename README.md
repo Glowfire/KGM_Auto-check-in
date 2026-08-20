@@ -1,6 +1,6 @@
-# KGM签到
+# 酷狗签到
 
-GitHub Actions 实现 `KGM概念VIP` 自动签到，每天领取总计 `两天KGM概念VIP`
+GitHub Actions 实现 `酷狗概念VIP` 自动签到，每天领取总计 `两天酷狗概念VIP`
 
 登录后即可使用，目前提供二维码登录(推荐)和手机号登录(一个手机号绑定多个账号无法登录，见 [多账号登录问题](https://github.com/MakcRe/KuGouMusicApi/issues/51))
 
@@ -23,14 +23,9 @@ GitHub Actions 实现 `KGM概念VIP` 自动签到，每天领取总计 `两天KG
 >
 > 若登录后听歌领取失败，请到APP 活动中心->天天签到领VIP(这个活动新用户好像没有) 查看当日是否已经领取VIP。
 
-### 部署教程
-<details>
-<summary>展开</summary>
+1. Fork 本仓库
 
-
-1. __Fork 本仓库__
-
-1. __创建添加令牌__
+1. 创建添加令牌
    - **创建令牌**  
      复制下方官网链接，在浏览器中打开
 
@@ -47,41 +42,68 @@ GitHub Actions 实现 `KGM概念VIP` 自动签到，每天领取总计 `两天KG
       **Repository permissions (仓库权限)**：`Metadata` 保持只读，`Secrets` 设置为读写
       ![精细化个人访问令牌权限](imgs/精细化个人访问令牌权限.png)
    - 滑动到底部，点击绿色的 Generate token 保存按钮
-   - 复制生成的字符串，回到本仓库添加到[Secret](#secret-位置)
-   - 变量名 `PAT`，value 为复制的令牌
+   - 复制生成的字符串，回到本仓库添加到`Secret`，变量名 `PAT`，value 为复制的令牌
 
-1. __登录__(两种登录方式任选其一)
+1. 登录（两种独立的登录方式，任选其一）
 
-   3.1 二维码(推荐)
+   3.1 二维码登录(推荐)
 
-   运行 Actions `qrcodeLogin` 并进入(若不显示,可以刷新页面)，点击`run` -> 展开二维码登录, 根据提示操作即可。
+   运行 Actions `二维码登录`，点击 Run → 在运行摘要页面（Summary）查看二维码图片，使用酷狗音乐 APP 扫码并确认登录即可。
 
-   3.2 手机号
+   3.2 手机号登录
 
-   添加手机号到 Secret `PHONE`，运行 Actions `sent` 获取验证码，把验证码添加到 Secret `CODE`；运行Actions `phoneLogin` ，成功即可
+   添加手机号到 Secret `PHONE`，运行 Actions `手机号登录`，操作步骤选择「发送验证码」获取验证码，把验证码添加到 Secret `CODE`；再次运行 Actions `手机号登录`，操作步骤选择「登录」即可。
 
-![登录](./imgs/登录.jpg)
+1. 启用 Actions `签到`，每天凌晨北京时间 01:10 自动签到（可在 `签到.yml` 中设置 cron）。安排在凌晨可抢在手动领取之前，避免与 APP 内领取当天青春版 VIP 名额冲突。启用 Actions `仓库保活` 以保证签到可以长期执行。
 
-1. 启用 Actions `main` , 每天北京时间 01:15 自动签到（可在`main.yml`中设置`cron`）。启用 Actions `Repository Keepalive` 以保证签到可以长期执行。
+1. （可选）配置运行结果通知
 
-![启用](./imgs/启用.jpg)
+   在仓库 Settings → Secrets and variables → Actions 中添加对应渠道的 Secret，签到完成后将自动推送结果通知。支持以下渠道（全部可选，配置多个将同时发送）：
+
+   | 通知渠道 | Secret 变量名 | 说明 |
+   |---------|-------------|------|
+   | 企业微信机器人 | `WECOM_BOT_KEY` | 企业微信群机器人 webhook 的 key |
+   | 钉钉机器人 | `DINGTALK_BOT_KEY` | 钉钉机器人 access_token |
+   | 钉钉加签 | `DINGTALK_SECRET` | 钉钉机器人加签密钥（可选） |
+   | 飞书机器人 | `FEISHU_BOT_KEY` | 飞书自定义机器人 webhook 的 key |
+   | 云湖机器人 | `YUNHU_BOT_KEY` | 云湖机器人 webhook 的 key |
+   | Server酱 | `SERVERCHAN_SENDKEY` | Server酱 SendKey |
+   | PushPlus | `PUSHPLUS_TOKEN` | PushPlus token |
+   | PushPlus群组 | `PUSHPLUS_TOPIC` | PushPlus 群组编码（可选） |
+   | Telegram | `TG_BOT_TOKEN` | Telegram Bot Token |
+   | Telegram | `TG_CHAT_ID` | Telegram 接收消息的 Chat ID |
+   | Bark (iOS) | `BARK_KEY` | Bark key 或完整 URL |
+   | Bark分组 | `BARK_GROUP` | Bark 消息分组（可选） |
+   | Discord | `DISCORD_WEBHOOK` | Discord Webhook 完整 URL |
+   | 邮箱 SMTP | `MAIL_HOST` | SMTP 服务器地址（如 `smtp.qq.com`） |
+   | 邮箱 SMTP | `MAIL_PORT` | SMTP 端口（默认 465） |
+   | 邮箱 SMTP | `MAIL_USER` | 发件邮箱账号 |
+   | 邮箱 SMTP | `MAIL_PASS` | 发件邮箱授权码（非登录密码） |
+   | 邮箱 SMTP | `MAIL_TO` | 收件邮箱地址 |
+
+   通知内容包含：运行日期、账号数量、成功/失败统计、各账号听歌领取状态、VIP 领取次数、VIP 到期时间、错误信息等。
 
 API源代码来自 [MakcRe/KuGouMusicApi](https://github.com/MakcRe/KuGouMusicApi) ~~图省事直接搬来~~
 
+## 令牌（Token）机制说明
+
+项目中包含两类令牌：
+
+1. **GitHub Personal Access Token (PAT)**：用于自动将酷狗登录信息写入仓库 Secret `USERINFO`，以及每周日自动刷新酷狗登录 Token。
+
+2. **酷狗登录 Token**：存储在 `USERINFO` Secret 中，用于酷狗 API 身份认证。通过登录获取，每周日自动刷新。
+
 ## Secret 位置
 
-1. `步骤一`
-
+1. 步骤一
    ![步骤一](./imgs/步骤一.jpg)
-1. `步骤二`
-   
+1. 步骤二
    ![步骤二](./imgs/步骤二.jpg)
-1. `步骤三`
+1. 步骤三
    ![步骤三](./imgs/步骤三.jpg)
-1. `步骤四`
+1. 步骤四
    ![步骤四](./imgs/步骤四.jpg)
-</details>
-   
+
 ## 致谢
 
 - 感谢 [@MakcRe](https://github.com/MakcRe) 提供 API 源代码
